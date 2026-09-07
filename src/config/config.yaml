@@ -1,0 +1,14 @@
+paths:
+  openagenda_events: "ressources/evenements-publics-openagenda.json"
+  faiss_index_file: "src/database/faiss_index.idx"
+  document_chunck_file: "src/database/document_chunks.pkl" 
+
+models:
+  embeddings_model: "BAAI/bge-m3"      #alternatives : "nomic-ai/nomic-embed-text-v1.5", "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
+  llm_model: ""
+
+indexer:
+  chunk_size: 1500
+  chunk_overlap: 150
+  embedding_batch_size: 32
+  search_k: 5
