@@ -4,6 +4,7 @@ import yaml
 from pydantic import BaseModel, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# --- config.yaml ---
 
 class PathsConfig(BaseModel):
     """Permet de récupérer les différents chemins d'accès des fichiers / dossiers"""
@@ -24,22 +25,15 @@ class ModelsConfig(BaseModel):
     embeddings_model : str
     llm_model : str
 
-class MistralConfig(BaseModel):
-    """Récupère les configurations de l'accès à mitral dans le fichier .env"""
-    model_config = SettingsConfigDict(env_file=".env", env_prefix="mistral_", extra="ignore")
-    api_key : str = "API KEY MISSING"
-
 class IndexerConfig(BaseModel):
     chunk_size : int
     chunk_overlap : int
     embedding_batch_size : int
     search_k : int
 
-
 class AppConfig(BaseModel):
     """Classe contenant les différentes configurations du projet"""
-    paths : PathsConfig
-    #mistral : MistralConfig
+    paths : PathsConfig    
     models : ModelsConfig
     indexer : IndexerConfig
 
@@ -50,6 +44,17 @@ def load_config(config_file : str = "config.yaml") -> AppConfig:
 
     return AppConfig.model_validate(raw_data)
 
+# ---------------------------
 
-# --- Variable configuration globale ---
+# --- .env ---
+
+class MistralConfig(BaseSettings):
+    """Récupère les configurations de l'accès à mitral dans le fichier .env"""
+    model_config = SettingsConfigDict(env_file=".env", env_prefix="mistral_", extra="ignore")
+    api_key : SecretStr = "API KEY MISSING"
+
+# ---------------------------
+
+# --- Variables configuration globale ---
 app_config = load_config(config_file = os.path.join(os.getcwd(), "src", "config", "config.yaml"))
+mistral_config = MistralConfig()
