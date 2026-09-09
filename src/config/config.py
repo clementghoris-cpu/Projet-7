@@ -11,8 +11,9 @@ class PathsConfig(BaseModel):
     openagenda_events : str
     faiss_index_file : str
     document_chunck_file : str
+    rag_prompt_file : str
 
-    @field_validator("openagenda_events", "faiss_index_file", "document_chunck_file", mode="after")
+    @field_validator("openagenda_events", "faiss_index_file", "document_chunck_file", "rag_prompt_file", mode="after")
     @classmethod
     def make_absolute_path(cls, value : str) -> str:
         if not os.path.isabs(value):

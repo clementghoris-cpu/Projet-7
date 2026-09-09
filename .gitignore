@@ -219,3 +219,8 @@ __marimo__/
 
 # fodler
 ressources/
+
+# cline
+.cline/
+.clinerules/
+memory-bank/

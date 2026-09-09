@@ -25,6 +25,7 @@ dependencies = [
     "pydantic-settings>=2.15.0",
     "pyyaml>=6.0.3",
     "sentence-transformers>=6.0.1",
+    "langchain-mistralai>=1.1.6",
 ]
 
 [project.optional-dependencies]

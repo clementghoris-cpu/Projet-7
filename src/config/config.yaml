@@ -1,11 +1,12 @@
 paths:
   openagenda_events: "ressources/evenements-publics-openagenda.json"
   faiss_index_file: "src/database/faiss_index.idx"
-  document_chunck_file: "src/database/document_chunks.pkl" 
+  document_chunck_file: "src/database/document_chunks.pkl"
+  rag_prompt_file: "src/rag/rag_prompt.txt"
 
 models:
   embeddings_model: "BAAI/bge-m3"      #alternatives : "nomic-ai/nomic-embed-text-v1.5", "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
-  llm_model: ""
+  llm_model: "open-mistral-nemo"
 
 indexer:
   chunk_size: 1500
