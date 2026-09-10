@@ -5,7 +5,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_mistralai import ChatMistralAI
 
-from src.config.config import app_config, mistral_config
+from src.config.config import app_config, api_keys_config
 from src.data.vector_store import VectorStoreManager
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -20,7 +20,7 @@ class RAGChainManager:
         logging.info(f"Initialisation du LLM Mistral avec le modèle : {app_config.models.llm_model}")
         self.llm = ChatMistralAI(
             model = app_config.models.llm_model,
-            api_key = mistral_config.api_key,
+            api_key = api_keys_config.mistral,
             temperature = 0.2
         )
 

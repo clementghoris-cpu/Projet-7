@@ -25,6 +25,8 @@ class ModelsConfig(BaseModel):
     """Récupère les différents modèles"""
     embeddings_model : str
     llm_model : str
+    evaluation_embeddings_model : str
+    evaluation_chat_model : str
 
 class IndexerConfig(BaseModel):
     chunk_size : int
@@ -49,13 +51,14 @@ def load_config(config_file : str = "config.yaml") -> AppConfig:
 
 # --- .env ---
 
-class MistralConfig(BaseSettings):
+class ApiKeysConfig(BaseSettings):
     """Récupère les configurations de l'accès à mitral dans le fichier .env"""
-    model_config = SettingsConfigDict(env_file=".env", env_prefix="mistral_", extra="ignore")
-    api_key : SecretStr = "API KEY MISSING"
+    model_config = SettingsConfigDict(env_file=".env", env_prefix="api_key_", extra="ignore")
+    mistral : SecretStr = "API KEY MISSING"
+    gemini : SecretStr = "API KEY MISSING"
 
 # ---------------------------
 
 # --- Variables configuration globale ---
 app_config = load_config(config_file = os.path.join(os.getcwd(), "src", "config", "config.yaml"))
-mistral_config = MistralConfig()
+api_keys_config = ApiKeysConfig()
