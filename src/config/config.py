@@ -56,6 +56,7 @@ class ApiKeysConfig(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_prefix="api_key_", extra="ignore")
     mistral : SecretStr = "API KEY MISSING"
     gemini : SecretStr = "API KEY MISSING"
+    openai : SecretStr = "API KEY MISSING"
 
 # ---------------------------
 

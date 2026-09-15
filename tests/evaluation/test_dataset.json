@@ -1,0 +1,22 @@
+[
+  {
+    "question": "Quels sont les concerts ou événements musicaux prévus ?",
+    "ground_truth": "Les événements musicaux incluent des concerts de jazz et de musique classique programmés dans les salles partenaires localisées dans la région ciblée."
+  },
+  {
+    "question": "Y a-t-il des expositions d'art ou de peinture prévues ce mois-ci ?",
+    "ground_truth": "Oui, plusieurs expositions d'art contemporain et peintures sont présentées dans les galeries et musées locaux aux dates indiquées."
+  },
+  {
+    "question": "Où se déroulent les spectacles de théâtre et quels sont leurs horaires ?",
+    "ground_truth": "Les pièces de théâtre se déroulent dans les théâtres municipaux et centres culturels répertoriés avec des représentations en soirée et en fin de semaine."
+  },
+  {
+    "question": "Quels événements culturels sont adaptés pour les enfants ou en famille ?",
+    "ground_truth": "Des ateliers créatifs, contes pour enfants et spectacles jeune public sont programmés durant les week-ends et vacances."
+  },
+  {
+    "question": "Proposez-vous des événements gratuits ou en accès libre ?",
+    "ground_truth": "Certaines conférences, festivals en plein air et expositions en médiathèque sont indiqués en accès libre et gratuits pour le public."
+  }
+]
