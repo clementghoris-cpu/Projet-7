@@ -91,7 +91,7 @@ def _rebuild_task():
     logging.info("Lancement de la reconstruction de l'index FAISS...")
     run_indexing(events_file_path=app_config.paths.openagenda_events)
     # Recharge la chaîne RAG avec le nouvel index
-    rag_manager = RAGChainManager(vector_store_manager=VectorStoreManager())
+    rag_manager = RAGChainManager()
     logging.info("Reconstruction de l'index terminée et RAG rechargé avec succès.")
 
 @app.post("/rebuild", response_model=RebuildResponse, tags=["Admin"])
