@@ -1,7 +1,7 @@
-import os
 import requests
 import streamlit as st
 from src.config.config import api_settings
+from datetime import datetime
 
 # Configuration de l'URL de votre API FastAPI (par défaut sur localhost:8000)
 API_URL = f"{api_settings.api_url}:{api_settings.api_port}"
@@ -13,6 +13,45 @@ st.set_page_config(
     page_title="Puls-Events Chatbot",    
     layout="wide"
 )
+
+def display_sources(sources: list):
+    """Affiche les sources OpenAgenda de manière structurée dans un expander."""
+    if not sources:
+        return
+        
+    with st.expander("📚 Sources utilisées"):
+        for i, src in enumerate(sources):
+            # Extraction des variables
+            title = src.get("title", "Événement sans titre")
+            city = src.get("city", "Ville non spécifiée")
+            url = src.get("canonicalurl")
+            raw_dates = src.get("event_dates", [])
+            
+            # Formate les dates pour un affichage propre (ex: 17/02/2027)
+            formatted_dates = []
+            for d in raw_dates:
+                try:
+                    formatted_dates.append(datetime.strptime(d, "%Y-%m-%d").strftime("%d/%m/%Y"))
+                except ValueError:
+                    formatted_dates.append(d)
+            
+            dates_str = ", ".join(formatted_dates) if formatted_dates else "Date non disponible"
+
+            # Séparateur visuel entre les sources
+            if i > 0:
+                st.divider()
+
+            # Mise en page sur deux colonnes (Infos + Lien)
+            col1, col2 = st.columns([3, 1])
+            
+            with col1:
+                st.markdown(f"**📌 {title}**")
+                st.caption(f"📍 **Ville :** {city} | 📅 **Dates :** {dates_str}")
+                
+            with col2:
+                if url:
+                    st.link_button("🔗 Voir l'événement", url, use_container_width=True)
+
 
 # ------------------------------------------------------------------------------
 # Barre latérale : Métadonnées et statut de l'API
@@ -71,35 +110,23 @@ for message in st.session_state.messages:
         
         # Si le message contient des sources (réponse de l'assistant)
         if "sources" in message and message["sources"]:
-            with st.expander("📚 Sources utilisées"):
-                for src in message["sources"]:
-                    st.write(f"- **{src.get('title', 'Événement')}** ({src.get('location', 'Lieu N/A')})")
+            display_sources(message["sources"])
 
 # Entrée utilisateur
 if prompt := st.chat_input("Ex: Quels sont les concerts prévus ce week-end ?"):
     
-    # 1. Ajouter et afficher le message de l'utilisateur
+    # Ajouter et afficher le message de l'utilisateur
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
-
-    # 2. Préparer l'historique récent (limité aux MAX_HISTORY_TURNS derniers échanges)
-    recent_messages = st.session_state.messages[-(MAX_HISTORY_TURNS * 2):]
-    
-    # Construction du prompt intégrant le contexte / l'historique de la conversation
-    # Note : Ajustez le format d'envoi selon ce que votre endpoint /ask attend dans `QueryRequest`
-    full_query = prompt
-    if len(recent_messages) > 1:
-        history_str = "\n".join([f"{m['role'].capitalize()}: {m['content']}" for m in recent_messages[:-1]])
-        full_query = f"Historique de la conversation :\n{history_str}\n\nNouvelle question utilisateur: {prompt}"
-
-    # 3. Appel à l'API RAG FastAPI
+   
+    # Appel à l'API RAG FastAPI
     with st.chat_message("assistant"):
         with st.spinner("Recherche d'événements en cours..."):
             try:
                 response = requests.post(
                     f"{API_URL}/ask",
-                    json={"question": full_query},
+                    json={"question": prompt},
                     timeout=30
                 )
                 
@@ -114,9 +141,7 @@ if prompt := st.chat_input("Ex: Quels sont les concerts prévus ce week-end ?"):
                     st.markdown(answer)
                     
                     if sources:
-                        with st.expander("📚 Sources utilisées"):
-                            for src in sources:
-                                st.write(f"- **{src.get('title', 'Événement')}** ({src.get('location', 'Lieu N/A')})")
+                        display_sources(sources)
 
                     # Sauvegarde dans la session Streamlit
                     st.session_state.messages.append({
