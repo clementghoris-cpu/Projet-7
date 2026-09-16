@@ -52,14 +52,21 @@ def load_config(config_file : str = "config.yaml") -> AppConfig:
 # --- .env ---
 
 class ApiKeysConfig(BaseSettings):
-    """Récupère les configurations de l'accès à mitral dans le fichier .env"""
+    """Récupère les clés API dans le fichier .env"""
     model_config = SettingsConfigDict(env_file=".env", env_prefix="api_key_", extra="ignore")
     mistral : SecretStr = "API KEY MISSING"
     gemini : SecretStr = "API KEY MISSING"
     openai : SecretStr = "API KEY MISSING"
+
+class ApiSettings(BaseSettings):
+    """Récupère les informations de l'API dans le fichier .env"""
+    model_config = SettingsConfigDict(env_file=".env", env_prefix="rag_", extra="ignore")
+    api_url : str = "http://localhost"
+    api_port : int = 8000
 
 # ---------------------------
 
 # --- Variables configuration globale ---
 app_config = load_config(config_file = os.path.join(os.getcwd(), "src", "config", "config.yaml"))
 api_keys_config = ApiKeysConfig()
+api_settings = ApiSettings()

@@ -34,6 +34,10 @@ api = [
     "fastapi>=0.141.1",
     "uvicorn>=0.52.4",
 ]
+client = [
+    "requests>=2.34.2",
+    "streamlit>=1.63.0",
+]
 
 [dependency-groups]
 dev = [
