@@ -220,7 +220,6 @@ __marimo__/
 # fodler
 ressources/
 
-# cline
-.cline/
-.clinerules/
-memory-bank/
+# database
+database/document_chunks.pkl
+database/faiss_index.idx

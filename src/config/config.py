@@ -33,6 +33,7 @@ class IndexerConfig(BaseModel):
     chunk_overlap : int
     embedding_batch_size : int
     search_k : int
+    similarity_threshold : float
 
 class AppConfig(BaseModel):
     """Classe contenant les différentes configurations du projet"""

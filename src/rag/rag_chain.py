@@ -16,6 +16,7 @@ class RAGChainManager:
         self.vector_store_manager = VectorStoreManager()
         self.prompt_template_str = self._load_prompt_template()
         self.prompt = ChatPromptTemplate.from_template(self.prompt_template_str)
+        self.similarity_threshold = app_config.indexer.similarity_threshold
 
         logging.info(f"Initialisation du LLM Mistral avec le modèle : {app_config.models.llm_model}")
         self.llm = ChatMistralAI(
@@ -45,9 +46,11 @@ class RAGChainManager:
             logging.error(f"Erreur lors de la lecture du fichier de prompt {path} : {e}")
             raise
 
-    def _retrieve_relevant_chunks(self, query: str, top_k: int = None) -> List[Dict[str, Any]]:
+    def _retrieve_relevant_chunks(self, query: str, top_k: int = None, threshold: float = None) -> List[Dict[str, Any]]:
         """Recherche les chunks les plus similaires dans l'index FAISS."""
         k = top_k or app_config.indexer.search_k
+        similarity_threshold = threshold or self.similarity_threshold
+
         if not self.vector_store_manager.index or self.vector_store_manager.index.ntotal == 0:
             logging.warning("L'index FAISS est vide ou non initialisé.")
             return []
@@ -60,12 +63,18 @@ class RAGChainManager:
         faiss.normalize_L2(query_vector)
 
         # Recherche dans l'index
-        _, indices = self.vector_store_manager.index.search(query_vector, k)
+        distances, indices = self.vector_store_manager.index.search(query_vector, k)
         
         results = []
-        for idx in indices[0]:
-            if idx != -1 and idx < len(self.vector_store_manager.document_chunks):
-                results.append(self.vector_store_manager.document_chunks[idx])
+        for dist, idx in zip(distances[0], indices[0]):
+            if idx == -1 and idx >= len(self.vector_store_manager.document_chunks):
+                continue
+
+            score = float(dist)
+            if score >= similarity_threshold:
+                chunk = self.vector_store_manager.document_chunks[idx].copy()
+                chunk["score"] = score
+                results.append(chunk)
 
         return results
 
@@ -118,7 +127,10 @@ class RAGChainManager:
             response_text = self.chain.invoke({"question": question})
 
             # Extraction des métadonnées des sources
-            sources = [chunk.get("metadata", {}) for chunk in retrieved_chunks]
+            if response_text.strip().lower().startswith("désolé"):
+                sources = []
+            else:
+                sources = [chunk.get("metadata", {}) for chunk in retrieved_chunks]
 
             return {
                 "question": question,

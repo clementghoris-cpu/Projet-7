@@ -15,3 +15,4 @@ indexer:
   chunk_overlap: 150
   embedding_batch_size: 32
   search_k: 5
+  similarity_threshold : 0.5
