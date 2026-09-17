@@ -8,7 +8,7 @@ models:
   embeddings_model: "BAAI/bge-m3"      #alternatives : "nomic-ai/nomic-embed-text-v1.5", "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
   llm_model: "open-mistral-nemo"
   evaluation_embeddings_model: "BAAI/bge-m3"
-  evaluation_chat_model: "ministral-8b-2512"
+  evaluation_chat_model: "mistral-small-2603"
 
 indexer:
   chunk_size: 1500

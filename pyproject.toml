@@ -3,33 +3,26 @@ name = "projet-7"
 version = "0.1.0"
 description = "Concevez et déployez un système RAG"
 readme = "README.md"
-authors = [
-    { name = "Clément Ghoris" }
-]
 requires-python = ">=3.12,<3.14"
-dependencies = [
-    "torch",
-    "torchvision",
-    "torchaudio",
-    "beautifulsoup4>=4.15.0",
-    "dotenv>=0.9.9",
-    "faiss-cpu>=1.15.0",
-    "langchain>=1.3.18",
-    "langchain-huggingface>=1.2.2",
-    "langchain-text-splitters>=1.1.2",
-    "logging>=0.4.9.6",
-    "mistral>=22.0.0",
+dependencies = [    
+    "logging>=0.4.9.6",    
     "numpy>=2.5.2",
     "pydantic>=2.13.5",
     "pydantic-settings>=2.15.0",
     "pyyaml>=6.0.3",
-    "sentence-transformers>=6.0.1",
-    "langchain-mistralai>=1.1.6",
-    "fastapi>=0.141.1",
-    
-]
+]   
 
 [project.optional-dependencies]
+rag = [
+    "torch",    
+    "beautifulsoup4>=4.15.0",
+    "faiss-cpu>=1.15.0",
+    "langchain>=1.3.18",
+    "langchain-huggingface>=1.2.2",
+    "langchain-text-splitters>=1.1.2",
+    "mistral>=22.0.0",
+]
+
 api = [
     "fastapi>=0.141.1",
     "uvicorn>=0.52.4",
@@ -43,15 +36,8 @@ client = [
 dev = [
     "pandas>=3.0.5",
     "pytest>=9.1.1",
-    "ragas>=0.4.3",
-    "google-genai>=2.22.0",
-    "langchain-community<=0.3.31",
-    "langchain-google-vertexai<=3.2.3",
-    "instructor[google-genai]>=1.17.0",
-    "langchain-ollama>=1.1.0",
     "openai>=3.3.0",
-    "mistralai>=2.10.0",
-    "langchain-mistralai>=1.1.6",
+    "deepeval>=4.2.3",
 ]
 
 
@@ -75,5 +61,3 @@ explicit = true
 
 [tool.uv.sources]
 torch = { index = "pytorch-cu124" }
-torchvision = { index = "pytorch-cu124" }
-torchaudio = { index = "pytorch-cu124" }

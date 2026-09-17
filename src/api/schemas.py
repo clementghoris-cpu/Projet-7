@@ -16,6 +16,7 @@ class QueryResponse(BaseModel):
     question: str
     answer: str
     sources: List[Dict[str, Any]]
+    context : List
 
 class RebuildResponse(BaseModel):
     status: str

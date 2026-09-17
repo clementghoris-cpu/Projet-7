@@ -116,7 +116,8 @@ class RAGChainManager:
             return {
                 "question": question,
                 "answer": "Veuillez poser une question valide.",
-                "sources": []
+                "sources": [],
+                "context": []
             }
 
         try:
@@ -135,14 +136,16 @@ class RAGChainManager:
             return {
                 "question": question,
                 "answer": response_text,
-                "sources": sources
+                "sources": sources,
+                "context": [c.get("text", "") for c in retrieved_chunks] if retrieved_chunks else ["Aucun contexte."]
             }
         except Exception as e:
             logging.error(f"Erreur lors de la génération de la réponse RAG : {e}")
             return {
                 "question": question,
                 "answer": "Une erreur technique est survenue lors du traitement de votre demande.",
-                "sources": []
+                "sources": [],
+                "context": []
             }
 
 if __name__ == "__main__":

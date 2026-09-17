@@ -223,3 +223,6 @@ ressources/
 # database
 database/document_chunks.pkl
 database/faiss_index.idx
+
+# evaluation
+tests/evaluation/evaluation_results.json
