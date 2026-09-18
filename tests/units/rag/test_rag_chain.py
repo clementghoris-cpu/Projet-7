@@ -11,26 +11,23 @@ from src.rag.rag_chain import RAGChainManager
 # ============================================================================
 
 @pytest.fixture
-def mock_app_config():
-    """Simule la configuration globale de l'application."""
-    with patch("src.rag.rag_chain.app_config") as mock_cfg, \
-         patch("src.rag.rag_chain.api_keys_config") as mock_keys:
-        mock_cfg.models.llm_model = "mistral-small-latest"
-        mock_cfg.paths.rag_prompt_file = "/fake/path/prompt.txt"
-        mock_cfg.indexer.search_k = 2
-        mock_keys.mistral = "fake_api_key"
-        yield mock_cfg
-
-
-@pytest.fixture
 def mock_dependencies():
-    """Mocke le VectorStoreManager, le prompt file et le LLM Mistral."""
+    """Mocke le VectorStoreManager, la configuration, le prompt file et le LLM Mistral."""
     prompt_content = "Context: {context}\nQuestion: {question}\nAnswer:"
 
     with patch("src.rag.rag_chain.Path.exists", return_value=True), \
          patch("builtins.open", mock_open(read_data=prompt_content)), \
          patch("src.rag.rag_chain.VectorStoreManager") as mock_vsm_cls, \
-         patch("src.rag.rag_chain.ChatMistralAI") as mock_llm_cls:
+         patch("src.rag.rag_chain.ChatMistralAI") as mock_llm_cls, \
+         patch("src.rag.rag_chain.app_config") as mock_cfg, \
+         patch("src.rag.rag_chain.api_keys_config") as mock_keys:
+
+        # Alignment des configurations pour les tests
+        mock_cfg.indexer.similarity_threshold = 0.5
+        mock_cfg.indexer.search_k = 2
+        mock_cfg.models.llm_model = "mistral-small-latest"
+        mock_cfg.paths.rag_prompt_file = "/fake/path/prompt.txt"
+        mock_keys.mistral = "fake_api_key"
 
         # Configuration du VectorStoreManager mocké
         mock_vsm_inst = MagicMock()
@@ -42,8 +39,8 @@ def mock_dependencies():
         ]
         # FAISS search retourne des distances et des index : (array([[...]]), array([[0, 1]]))
         mock_vsm_inst.index.search.return_value = (
-            np.array([[0.1, 0.2]], dtype="float32"),
-            np.array([[0, 1]])
+            np.array([[0.9, 0.85]], dtype="float32"),
+            np.array([[0, 1]], dtype=np.int64)
         )
         mock_vsm_cls.return_value = mock_vsm_inst
 
@@ -61,7 +58,7 @@ def mock_dependencies():
 # Tests d'Initialisation & Fichier Prompt
 # ============================================================================
 
-def test_init_success():
+def test_init_success(mock_dependencies):
     """Vérifie que RAGChainManager s'initialise correctement quand le prompt existe."""
     rag_manager = RAGChainManager()
     assert rag_manager.prompt_template_str is not None
@@ -100,7 +97,7 @@ def test_retrieve_relevant_chunks_empty_index(mock_dependencies):
     assert chunks == []
 
 
-def test_format_context_with_chunks():
+def test_format_context_with_chunks(mock_dependencies):
     """Vérifie le formatage textuel des chunks extraits."""
     rag_manager = RAGChainManager()
     chunks = [
@@ -116,7 +113,7 @@ def test_format_context_with_chunks():
     assert "URL d'information: N/A" in formatted
 
 
-def test_format_context_empty():
+def test_format_context_empty(mock_dependencies):
     """Vérifie le message retourné si aucun chunk n'est fourni."""
     rag_manager = RAGChainManager()
     formatted = rag_manager._format_context([])
@@ -143,7 +140,7 @@ def test_answer_question_valid_input(mock_dependencies):
 
 
 @pytest.mark.parametrize("empty_query", ["", "   ", None])
-def test_answer_question_empty_or_invalid_input(empty_query):
+def test_answer_question_empty_or_invalid_input(mock_dependencies, empty_query):
     """Vérifie la gestion des questions vides ou invalides."""
     rag_manager = RAGChainManager()
     result = rag_manager.answer_question(empty_query)
@@ -152,7 +149,7 @@ def test_answer_question_empty_or_invalid_input(empty_query):
     assert result["sources"] == []
 
 
-def test_answer_question_handles_exception():
+def test_answer_question_handles_exception(mock_dependencies):
     """Vérifie qu'une erreur durant l'exécution de la chaîne est capturée proprement."""
     rag_manager = RAGChainManager()
 

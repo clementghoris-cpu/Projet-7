@@ -33,6 +33,7 @@ def mock_rag_manager():
         "sources": [
             {"title": "Concert Jazz", "url": "https://example.com/jazz"}
         ],
+        "context": []
     }
     return rag_mock
 
