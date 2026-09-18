@@ -3,13 +3,23 @@ import logging
 
 from src.config.config import app_config
 from src.data.vector_store import VectorStoreManager
+from src.utils.data_fetch import update_events
 from src.utils.data_loader import parse_json_data
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-def run_indexing(events_file_path : str):
+def run_indexing(events_file_path : str, fetch_latest_events : bool = False):
     """Exécute le processus d'indexation"""
+
+    if fetch_latest_events:
+        logger.info("Récupération des nouveaux événements depuis l'API OpenAgenda...")
+        success = update_events(events_file_path)
+
+        if not success:
+            logger.error("La mise à jour des événements a échoué. Arrêt du processus d'indexation.")
+            return
+
     logger.info(f"Chargement des évènements depuis le fichier : {events_file_path}")
     documents = parse_json_data(events_file_path)
 
@@ -44,4 +54,4 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    run_indexing(events_file_path=args.events_file_path)
+    run_indexing(events_file_path=args.events_file_path, fetch_latest_events=True)

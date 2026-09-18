@@ -63,9 +63,19 @@ class ApiSettings(BaseSettings):
     api_url : str = "http://localhost"
     api_port : int = 8000
 
+class OpenagendaSettings(BaseSettings):
+    """Récupère les informations de l'API openagenda dans le fichier .env"""
+    model_config = SettingsConfigDict(env_file=".env", env_prefix="openagenda_", extra="ignore")
+    api_url : str = "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/evenements-publics-openagenda/records"
+    location_filter : str = "location_region='Hauts-de-France'"
+    start_date : str = "2026-01-01"
+    end_date : str = "2026-12-31"
+    max_events : int = 1000
+
 # ---------------------------
 
 # --- Variables configuration globale ---
 app_config = load_config(config_file = os.path.join(os.getcwd(), "src", "config", "config.yaml"))
 api_keys_config = ApiKeysConfig()
 api_settings = ApiSettings()
+openagenda_settings = OpenagendaSettings()

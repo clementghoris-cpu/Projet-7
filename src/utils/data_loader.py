@@ -1,6 +1,7 @@
 import json
 import logging
 from datetime import datetime
+from textwrap import dedent
 
 from bs4 import BeautifulSoup
 from langchain_core.documents import Document
@@ -95,9 +96,22 @@ def parse_json_data(file_path : str) -> list[Document]:
         events = json.load(file)
 
     documents = []
+    seen_uids = set()
     logger.info(f"Lecture du fichier {file_path}. {len(events)} évènements récupérés.")
 
     for item in events:
+        title = (item.get("title_fr", "") or "").strip()
+        if not title:
+            continue
+
+        uid = (item.get("uid", "") or "").strip()
+        # la première condition dans le if permet de vérifier si l'uid n'est pas une chaîne vide
+        if uid and uid in seen_uids:
+            continue
+
+        if uid:
+            seen_uids.add(uid)
+
         clean_desc = clean_html(item.get("longdescription_fr", ""))
         full_location = build_location_str(item)
 
@@ -118,14 +132,15 @@ def parse_json_data(file_path : str) -> list[Document]:
         else:
             dates_text = f"Le {start_date_readable}"
 
-        page_content = f"""Titre: {item.get('title_fr', '')}
-                            Mots-clés: {keywords_str}
-                            Description: {clean_desc}
-                            Dates et Horaires: {dates_text}
-                            Lieu: {full_location}"""
+        page_content = dedent(f"""\
+            Titre: {item.get('title_fr', '')}
+            Mots-clés: {keywords_str}
+            Description: {clean_desc}
+            Dates et Horaires: {dates_text}
+            Lieu: {full_location}""").strip()
 
         metadata = {
-            "uid": str(item.get("uid", "")),
+            "uid": str(uid),
             "canonicalurl": item.get("canonicalurl", ""),
             "title": item.get("title_fr", ""),
             "city": item.get("location_city", ""),

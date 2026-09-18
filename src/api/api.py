@@ -127,7 +127,7 @@ def _rebuild_task():
     """Tâche en arrière-plan pour reconstruire l'index FAISS et réinitialiser le RAG."""
     global rag_manager
     logger.info("Lancement de la reconstruction de l'index FAISS...")
-    run_indexing(events_file_path=app_config.paths.openagenda_events)
+    run_indexing(events_file_path=app_config.paths.openagenda_events, fetch_latest_events=True)
     # Recharge la chaîne RAG avec le nouvel index
     rag_manager = RAGChainManager()
     logger.info("Reconstruction de l'index terminée et RAG rechargé avec succès.")
