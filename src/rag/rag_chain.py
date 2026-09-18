@@ -1,14 +1,16 @@
 import logging
 from pathlib import Path
-from typing import Dict, Any, List
-from langchain_core.prompts import ChatPromptTemplate
+from typing import Any
+
 from langchain_core.output_parsers import StrOutputParser
+from langchain_core.prompts import ChatPromptTemplate
 from langchain_mistralai import ChatMistralAI
 
-from src.config.config import app_config, api_keys_config
+from src.config.config import api_keys_config, app_config
 from src.data.vector_store import VectorStoreManager
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 class RAGChainManager:
     def __init__(self):
@@ -18,7 +20,7 @@ class RAGChainManager:
         self.prompt = ChatPromptTemplate.from_template(self.prompt_template_str)
         self.similarity_threshold = app_config.indexer.similarity_threshold
 
-        logging.info(f"Initialisation du LLM Mistral avec le modèle : {app_config.models.llm_model}")
+        logger.info(f"Initialisation du LLM Mistral avec le modèle : {app_config.models.llm_model}")
         self.llm = ChatMistralAI(
             model = app_config.models.llm_model,
             api_key = api_keys_config.mistral,
@@ -33,26 +35,26 @@ class RAGChainManager:
 
         if not path.exists():
             error_msg = f"Le fichier de prompt est introuvable à l'emplacement : {path.resolve()}"
-            logging.error(error_msg)
+            logger.error(error_msg)
             raise FileNotFoundError(error_msg)
 
         try:
             with open(path, 'r', encoding="utf-8") as file:
                 template_content = file.read()
 
-            logging.info(f"Prompt chargé avec succès depuis : {path}")
+            logger.info(f"Prompt chargé avec succès depuis : {path}")
             return template_content
         except Exception as e:
-            logging.error(f"Erreur lors de la lecture du fichier de prompt {path} : {e}")
+            logger.error(f"Erreur lors de la lecture du fichier de prompt {path} : {e}")
             raise
 
-    def _retrieve_relevant_chunks(self, query: str, top_k: int = None, threshold: float = None) -> List[Dict[str, Any]]:
+    def _retrieve_relevant_chunks(self, query: str, top_k: int | None = None, threshold: float | None = None) -> list[dict[str, Any]]:
         """Recherche les chunks les plus similaires dans l'index FAISS."""
         k = top_k or app_config.indexer.search_k
         similarity_threshold = threshold or self.similarity_threshold
 
         if not self.vector_store_manager.index or self.vector_store_manager.index.ntotal == 0:
-            logging.warning("L'index FAISS est vide ou non initialisé.")
+            logger.warning("L'index FAISS est vide ou non initialisé.")
             return []
 
         # Vectorisation de la requête utilisateur
@@ -78,7 +80,7 @@ class RAGChainManager:
 
         return results
 
-    def _format_context(self, chunks: List[Dict[str, Any]]) -> str:
+    def _format_context(self, chunks: list[dict[str, Any]]) -> str:
         """Formate les chunks extraits pour les injecter proprement dans le prompt."""
         if not chunks:
             return "Aucun événement pertinent trouvé."
@@ -94,7 +96,7 @@ class RAGChainManager:
 
     def _build_chain(self):
         """Assemble la chaîne LangChain (LCEL) pour le RAG."""
-        def get_context(input_data: Dict[str, Any]) -> str:
+        def get_context(input_data: dict[str, Any]) -> str:
             query = input_data["question"]
             retrieved_chunks = self._retrieve_relevant_chunks(query)
             return self._format_context(retrieved_chunks)
@@ -110,7 +112,7 @@ class RAGChainManager:
         )
         return chain
 
-    def answer_question(self, question: str) -> Dict[str, Any]:
+    def answer_question(self, question: str) -> dict[str, Any]:
         """Traite une question utilisateur, gère les cas limites et retourne la réponse enrichie avec métadonnées."""
         if not question or not question.strip():
             return {
@@ -139,8 +141,8 @@ class RAGChainManager:
                 "sources": sources,
                 "context": [c.get("text", "") for c in retrieved_chunks] if retrieved_chunks else ["Aucun contexte."]
             }
-        except Exception as e:
-            logging.error(f"Erreur lors de la génération de la réponse RAG : {e}")
+        except Exception as e:  # noqa: BLE001
+            logger.error(f"Erreur lors de la génération de la réponse RAG : {e}")
             return {
                 "question": question,
                 "answer": "Une erreur technique est survenue lors du traitement de votre demande.",

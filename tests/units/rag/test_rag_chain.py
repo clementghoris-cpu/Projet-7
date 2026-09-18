@@ -1,10 +1,10 @@
-import pytest
+from unittest.mock import MagicMock, mock_open, patch
+
 import numpy as np
-from unittest.mock import MagicMock, patch, mock_open
+import pytest
 from langchain_core.runnables import RunnableSequence
 
 from src.rag.rag_chain import RAGChainManager
-
 
 # ============================================================================
 # Fixtures pour isoler les dépendances externes

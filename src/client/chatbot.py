@@ -1,7 +1,10 @@
+from datetime import date
+
 import requests
 import streamlit as st
+from requests.exceptions import HTTPError
+
 from src.config.config import api_settings
-from datetime import datetime
 
 # Configuration de l'URL de votre API FastAPI (par défaut sur localhost:8000)
 API_URL = f"{api_settings.api_url}:{api_settings.api_port}"
@@ -31,7 +34,7 @@ def display_sources(sources: list):
             formatted_dates = []
             for d in raw_dates:
                 try:
-                    formatted_dates.append(datetime.strptime(d, "%Y-%m-%d").strftime("%d/%m/%Y"))
+                    formatted_dates.append(date.fromisoformat(d).strftime("%d/%m/%Y"))
                 except ValueError:
                     formatted_dates.append(d)
             
@@ -70,7 +73,7 @@ with st.sidebar:
             st.write(f"**Vecteurs en mémoire :** {health_data.get('total_vectors', 0)}")
         else:
             st.error("🔴 API Inaccessible")
-    except Exception as e:
+    except Exception as e:   # noqa: BLE001
         st.error(f"🔴 Erreur de connexion : {e}")
 
     st.markdown("---")
@@ -78,14 +81,16 @@ with st.sidebar:
     # Récupération des métadonnées (/metadata)
     try:
         meta_res = requests.get(f"{API_URL}/metadata", timeout=5)
+        meta_res.raise_for_status()
+
         if meta_res.status_code == 200:
             meta_data = meta_res.json()
             st.subheader("Configuration RAG")
             st.write(f"**Modèle LLM :** {meta_data.get('llm_model')}")
             st.write(f"**Modèle Embeddings :** {meta_data.get('embeddings_model')}")
             st.write(f"**Chunks totaux :** {meta_data.get('total_chunks')}")
-    except Exception:
-        pass
+    except HTTPError as e:
+        print(f"Erreur status HTTP : {e}")
 
     st.markdown("---")
     # Bouton pour vider l'historique
@@ -109,7 +114,7 @@ for message in st.session_state.messages:
         st.markdown(message["content"])
         
         # Si le message contient des sources (réponse de l'assistant)
-        if "sources" in message and message["sources"]:
+        if message.get("sources"):
             display_sources(message["sources"])
 
 # Entrée utilisateur
@@ -121,38 +126,37 @@ if prompt := st.chat_input("Ex: Quels sont les concerts prévus ce week-end ?"):
         st.markdown(prompt)
    
     # Appel à l'API RAG FastAPI
-    with st.chat_message("assistant"):
-        with st.spinner("Recherche d'événements en cours..."):
-            try:
-                response = requests.post(
-                    f"{API_URL}/ask",
-                    json={"question": prompt},
-                    timeout=30
-                )
+    with st.chat_message("assistant"), st.spinner("Recherche d'événements en cours..."):
+        try:
+            response = requests.post(
+                f"{API_URL}/ask",
+                json={"question": prompt},
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
                 
-                if response.status_code == 200:
-                    data = response.json()
-                    
-                    # Récupération de la réponse et des sources retournées par votre API
-                    answer = data.get("answer", data.get("response", "Pas de réponse reçue."))
-                    sources = data.get("sources", [])
-                    
-                    # Affichage de la réponse
-                    st.markdown(answer)
-                    
-                    if sources:
-                        display_sources(sources)
+                # Récupération de la réponse et des sources retournées par votre API
+                answer = data.get("answer", data.get("response", "Pas de réponse reçue."))
+                sources = data.get("sources", [])
+                
+                # Affichage de la réponse
+                st.markdown(answer)
+                
+                if sources:
+                    display_sources(sources)
 
-                    # Sauvegarde dans la session Streamlit
-                    st.session_state.messages.append({
-                        "role": "assistant",
-                        "content": answer,
-                        "sources": sources
-                    })
+                # Sauvegarde dans la session Streamlit
+                st.session_state.messages.append({
+                    "role": "assistant",
+                    "content": answer,
+                    "sources": sources
+                })
 
-                else:
-                    error_detail = response.json().get("detail", "Erreur lors de la requête.")
-                    st.error(f"Erreur API ({response.status_code}) : {error_detail}")
+            else:
+                error_detail = response.json().get("detail", "Erreur lors de la requête.")
+                st.error(f"Erreur API ({response.status_code}) : {error_detail}")
 
-            except requests.exceptions.RequestException as e:
-                st.error(f"Impossible de contacter l'API : {e}")
+        except requests.exceptions.RequestException as e:
+            st.error(f"Impossible de contacter l'API : {e}")

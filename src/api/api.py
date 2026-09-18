@@ -1,14 +1,22 @@
 import logging
-from fastapi import FastAPI, HTTPException, FastAPI, BackgroundTasks, status
-
 from contextlib import asynccontextmanager
+
+from fastapi import BackgroundTasks, FastAPI, HTTPException, status
+
+from src.api.schemas import (
+    HealthResponse,
+    MetadataResponse,
+    QueryRequest,
+    QueryResponse,
+    RebuildResponse,
+)
 from src.config.config import app_config
-from src.rag.rag_chain import RAGChainManager
-from src.data.vector_store import VectorStoreManager
 from src.data.indexer import run_indexing
-from src.api.schemas import QueryRequest, QueryResponse, MetadataResponse, RebuildResponse, SourceMetadata, HealthResponse
+from src.rag.rag_chain import RAGChainManager
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
 rag_manager: RAGChainManager | None = None
 
 @asynccontextmanager
@@ -17,12 +25,12 @@ async def lifespan(app: FastAPI):
     Gère le cycle de vie de l'application (Démarrage / Extinction).
     """
     global rag_manager
-    logging.info("Démarrage de l'API REST et chargement du système RAG...")
+    logger.info("Démarrage de l'API REST et chargement du système RAG...")
     try:
         rag_manager = RAGChainManager()
-        logging.info("Système RAG prêt à recevoir des requêtes.")
-    except Exception as e:
-        logging.error(f"Erreur lors de l'initialisation du système RAG au démarrage : {e}")
+        logger.info("Système RAG prêt à recevoir des requêtes.")
+    except Exception as e:  #noqa: BLE001
+        logger.error(f"Erreur lors de l'initialisation du système RAG au démarrage : {e}")
 
     yield
 
@@ -88,11 +96,11 @@ def ask_question(request: QueryRequest):
 def _rebuild_task():
     """Tâche en arrière-plan pour reconstruire l'index FAISS et réinitialiser le RAG."""
     global rag_manager
-    logging.info("Lancement de la reconstruction de l'index FAISS...")
+    logger.info("Lancement de la reconstruction de l'index FAISS...")
     run_indexing(events_file_path=app_config.paths.openagenda_events)
     # Recharge la chaîne RAG avec le nouvel index
     rag_manager = RAGChainManager()
-    logging.info("Reconstruction de l'index terminée et RAG rechargé avec succès.")
+    logger.info("Reconstruction de l'index terminée et RAG rechargé avec succès.")
 
 @app.post("/rebuild", response_model=RebuildResponse, tags=["Admin"])
 def rebuild_index(background_tasks: BackgroundTasks):

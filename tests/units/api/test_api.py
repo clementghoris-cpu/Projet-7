@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 
 from src.api.api import app
 
+
 # ============================================================================
 # Fixtures & Mocks Setup
 # ============================================================================

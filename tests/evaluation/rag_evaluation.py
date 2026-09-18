@@ -2,17 +2,23 @@ import json
 import logging
 import os
 import re
-import pandas as pd
-from typing import List
 
-from deepeval.metrics import FaithfulnessMetric, AnswerRelevancyMetric, ContextualRelevancyMetric
-from deepeval.test_case import LLMTestCase, SingleTurnParams
+import pandas as pd
+from deepeval.metrics import (
+    AnswerRelevancyMetric,
+    ContextualPrecisionMetric,
+    ContextualRecallMetric,
+    ContextualRelevancyMetric,
+    FaithfulnessMetric,
+)
 from deepeval.models.base_model import DeepEvalBaseLLM
-from openai import OpenAI, AsyncOpenAI
+from deepeval.test_case import LLMTestCase
+from openai import AsyncOpenAI, OpenAI
 
 from src.config.config import api_keys_config, app_config
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 TEST_DATASET_PATH = "tests/evaluation/test_dataset.json"
 
@@ -83,8 +89,8 @@ class MistralEvaluatorLLM(DeepEvalBaseLLM):
 # ============================================================================
 # Chargement du dataset
 # ============================================================================
-def load_test_cases(dataset_path: str = TEST_DATASET_PATH) -> List[LLMTestCase]:
-    logging.info(f"Chargement du jeu de test depuis {dataset_path}...")
+def load_test_cases(dataset_path: str = TEST_DATASET_PATH) -> list[LLMTestCase]:
+    logger.info(f"Chargement du jeu de test depuis {dataset_path}...")
 
     with open(dataset_path, "r", encoding="utf-8") as f:
         test_data = json.load(f)
@@ -107,18 +113,20 @@ def load_test_cases(dataset_path: str = TEST_DATASET_PATH) -> List[LLMTestCase]:
         )
         test_cases.append(test_case)
 
-    logging.info(f"{len(test_cases)} cas de test chargés et validés avec succès.")
+    logger.info(f"{len(test_cases)} cas de test chargés et validés avec succès.")
     return test_cases
 
 # ============================================================================
 # Exécution des évaluations
 # ============================================================================
-def run_evaluation(test_cases: List[LLMTestCase], mistral_llm: MistralEvaluatorLLM) -> list[dict]:
+def run_evaluation(test_cases: list[LLMTestCase], mistral_llm: MistralEvaluatorLLM) -> list[dict]:
     """Évalue chaque cas de test et retourne une liste de dictionnaires structurés."""
 
     faithfulness_metric = FaithfulnessMetric(threshold=0.5, model=mistral_llm)
     relevancy_metric = AnswerRelevancyMetric(threshold=0.5, model=mistral_llm)
     contextual_relevancy_metric = ContextualRelevancyMetric(threshold=0.5, model=mistral_llm)
+    contextual_precision_metric = ContextualPrecisionMetric(threshold=0.5, model=mistral_llm)
+    contextual_recall_metric = ContextualRecallMetric(threshold=0.5, model=mistral_llm)
 
     # correctness_metric = GEval(
     #     name="Answer Correctness",
@@ -132,16 +140,18 @@ def run_evaluation(test_cases: List[LLMTestCase], mistral_llm: MistralEvaluatorL
 
     results = []
 
-    logging.info("Démarrage de l'évaluation...")
+    logger.info("Démarrage de l'évaluation...")
 
     for idx, test_case in enumerate(test_cases, 1):
-        logging.info(f"Évaluation du cas {idx}/{len(test_cases)}...")
+        logger.info(f"Évaluation du cas {idx}/{len(test_cases)}...")
 
         # Exécution des mesures
         faithfulness_metric.measure(test_case)
         relevancy_metric.measure(test_case)
         #correctness_metric.measure(test_case)
         contextual_relevancy_metric.measure(test_case)
+        contextual_precision_metric.measure(test_case)
+        contextual_recall_metric.measure(test_case)
 
         # Structure claire et lisible par échantillon
         sample_result = {
@@ -153,13 +163,17 @@ def run_evaluation(test_cases: List[LLMTestCase], mistral_llm: MistralEvaluatorL
                 "faithfulness": faithfulness_metric.score,
                 "relevancy": relevancy_metric.score,
                 #"correctness": correctness_metric.score,
-                "contextual_relevancy": contextual_relevancy_metric.score
+                "contextual_relevancy": contextual_relevancy_metric.score, 
+                "contextual_precision": contextual_precision_metric.score,
+                "contextual_recall": contextual_recall_metric.score
             },
             "reasons": {
                 "faithfulness": faithfulness_metric.reason,
                 "relevancy": relevancy_metric.reason,
                 #"correctness": correctness_metric.reason,
-                "contextual_relevancy": contextual_relevancy_metric.reason
+                "contextual_relevancy": contextual_relevancy_metric.reason,
+                "contextual_precision": contextual_precision_metric.reason,
+                "contextual_recall": contextual_recall_metric.reason
             },
         }
 
@@ -175,7 +189,7 @@ def save_results_to_json(results: list[dict], output_path: str = "tests/evaluati
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(results, f, ensure_ascii=False, indent=4)
 
-    logging.info(f"Résultats sauvegardés avec succès dans : {output_path}")
+    logger.info(f"Résultats sauvegardés avec succès dans : {output_path}")
 
 
 def display_summary_table(results: list[dict]):
@@ -194,7 +208,9 @@ def display_summary_table(results: list[dict]):
                 "Faithfulness": r["scores"]["faithfulness"],
                 "Relevancy": r["scores"]["relevancy"],
                 #"Correctness": r["scores"]["correctness"],
-                "Contextual_relevancy": r["scores"]["contextual_relevancy"]
+                "Contextual_relevancy": r["scores"]["contextual_relevancy"],
+                "contextual_precision": r["scores"]["contextual_precision"],
+                "contextual_recall": r["scores"]["contextual_recall"]
             }
         )
 

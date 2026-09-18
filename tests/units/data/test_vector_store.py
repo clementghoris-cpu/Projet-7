@@ -1,6 +1,7 @@
-import pytest
+from unittest.mock import MagicMock, mock_open, patch
+
 import numpy as np
-from unittest.mock import MagicMock, patch, mock_open
+import pytest
 from langchain_core.documents import Document
 
 from src.data.vector_store import VectorStoreManager

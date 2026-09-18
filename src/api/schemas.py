@@ -1,4 +1,5 @@
-from typing import List, Dict, Any
+from typing import Any
+
 from pydantic import BaseModel, Field
 
 
@@ -15,8 +16,8 @@ class SourceMetadata(BaseModel):
 class QueryResponse(BaseModel):
     question: str
     answer: str
-    sources: List[Dict[str, Any]]
-    context : List
+    sources: list[dict[str, Any]]
+    context : list
 
 class RebuildResponse(BaseModel):
     status: str

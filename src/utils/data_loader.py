@@ -1,7 +1,8 @@
 import json
 import logging
-from bs4 import BeautifulSoup
 from datetime import datetime
+
+from bs4 import BeautifulSoup
 from langchain_core.documents import Document
 
 # --- 
@@ -24,6 +25,7 @@ from langchain_core.documents import Document
 # ---
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 def clean_html(html_content : str) -> str:
     """Supprime les balises HTML et les espaces superflus"""
@@ -93,7 +95,7 @@ def parse_json_data(file_path : str) -> list[Document]:
         events = json.load(file)
 
     documents = []
-    logging.info(f"Lecture du fichier {file_path}. {len(events)} évènements récupérés.")
+    logger.info(f"Lecture du fichier {file_path}. {len(events)} évènements récupérés.")
 
     for item in events:
         clean_desc = clean_html(item.get("longdescription_fr", ""))
