@@ -56,8 +56,6 @@ class ApiKeysConfig(BaseSettings):
     """Récupère les clés API dans le fichier .env"""
     model_config = SettingsConfigDict(env_file=".env", env_prefix="api_key_", extra="ignore")
     mistral : SecretStr = "API KEY MISSING"
-    gemini : SecretStr = "API KEY MISSING"
-    openai : SecretStr = "API KEY MISSING"
 
 class ApiSettings(BaseSettings):
     """Récupère les informations de l'API dans le fichier .env"""
