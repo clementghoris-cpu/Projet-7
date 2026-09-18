@@ -14,10 +14,9 @@ ENV PATH="/app/.venv/bin:$PATH"
 
 COPY pyproject.toml uv.lock ./
 RUN --mount=type=cache,target=/root/.cache/uv \
-    uv sync --frozen --no-dev --extra client --no-install-project
+    uv sync --frozen --no-dev --no-editable --extra client --no-install-project
 
 COPY src/client/chatbot.py /app
-COPY src/config/ ./config/
-RUN uv sync --frozen --no-dev --extra client
+COPY src/config/ /app/src/config/
 
 CMD ["streamlit", "run", "chatbot.py", "--server.port=8501", "--server.address=0.0.0.0"]
