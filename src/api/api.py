@@ -44,7 +44,15 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-@app.get("/health", response_model=HealthResponse, tags=["System"])
+@app.get(
+        "/health", 
+        response_model=HealthResponse, 
+        tags=["System"],
+        summary="Vérifie l'état de l'API et du vector store FAISS",
+        description="Retourne status 'OK', si le vector store est correctement chargé et le nombre de vecteurs chargés",
+        responses= {
+            200: {"description": "Statut API"},
+        })
 def health_check():
     """Vérifie l'état de santé de l'API et du Vector Store FAISS."""
     is_loaded = False
@@ -60,7 +68,17 @@ def health_check():
         total_vectors=vector_count
     )
 
-@app.get("/metadata", response_model=MetadataResponse, tags=["System"])
+@app.get(
+        "/metadata", 
+        response_model=MetadataResponse, 
+        tags=["System"],
+        summary="Afficher les métadonnées du système d'indexation",
+        description=("Retourne les informations liées au système d'indexation:\n"
+                     "le nombre total de chunks, les modèles llm et embeddings utilisés, "
+                     "la taille des chunks ainsi que l'overlap"),
+        responses= {
+            200: {"description": "métadonnées du système d'indexation"}
+        })
 def get_metadata():
     """Retourne les métadonnées et statistiques du système d'indexation."""
     total_chunks = 0
@@ -75,7 +93,19 @@ def get_metadata():
         chunk_overlap=app_config.indexer.chunk_overlap
     )
 
-@app.post("/ask", response_model=QueryResponse, tags=["RAG"])
+@app.post("/ask", 
+          response_model=QueryResponse, 
+          tags=["RAG"],
+          summary="Question utilisateur posée au système RAG",
+          description=(
+              "1. Envoie une question au pipeline RAG.\n"
+              "2. Le pipeline recherche les événements dans l'index FAISS\n"
+              "3. Le pipeline retourne une réponse augmentée via le LLM de Mistral"),
+          responses={
+              200: {"description": "Réponse du Pipeline RAG"},
+              503: {"description": "Système RAG non initialisé"},
+              400: {"description": "Erreur question vide"},
+          })
 def ask_question(request: QueryRequest):
     """Reçoit une question utilisateur et retourne la réponse générée par Mistral augmentée des données FAISS."""
     if not rag_manager:
@@ -102,7 +132,17 @@ def _rebuild_task():
     rag_manager = RAGChainManager()
     logger.info("Reconstruction de l'index terminée et RAG rechargé avec succès.")
 
-@app.post("/rebuild", response_model=RebuildResponse, tags=["Admin"])
+@app.post(
+        "/rebuild", 
+        response_model=RebuildResponse, 
+        tags=["Admin"],
+        summary="Reconstruction de l'index FAISS",
+        description=("Requête l'API Openagenda pour récupérer les événement filtré, "
+                     "nettoie les données des événements, "
+                     "génère les chunks et embeddings, reconstruit l'index FAISS"),
+        responses={
+            200: {"description": "Message reconstruction de l'index FAISS démarré en arrière plan"}
+        })
 def rebuild_index(background_tasks: BackgroundTasks):
     """Déclenche la reconstruction de l'index vectoriel FAISS en arrière-plan à partir des données brutes."""
     background_tasks.add_task(_rebuild_task)
