@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 from typing import Any
+from datetime import date
 
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
@@ -104,7 +105,8 @@ class RAGChainManager:
         chain = (
             {
                 "context": get_context,
-                "question": lambda x: x["question"]
+                "question": lambda x: x["question"],
+                "today": lambda _: date.today().strftime("%A /%d /%B /%Y")
             }
             | self.prompt
             | self.llm
