@@ -1,6 +1,6 @@
-import os
 import json
 import logging
+import os
 
 import requests
 from requests.exceptions import HTTPError
