@@ -1,3 +1,4 @@
+import os
 import json
 import logging
 
@@ -66,5 +67,9 @@ def update_events(events_file_path : str) -> bool:
 if __name__ == "__main__":    
     print("Récupération des événements...")
     file_path = "ressources/evenements-publics-openagenda.json"
+    folder_path = os.path.dirname(file_path)
+
+    if folder_path:
+        os.makedirs(folder_path, exist_ok=True)
 
     update_events(file_path)
