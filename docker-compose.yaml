@@ -1,0 +1,39 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: src/api/Dockerfile
+    container_name: rag_api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:        
+      - API_KEY_MISTRAL=${API_KEY_MISTRAL}     
+
+      - OPENAGENDA_API_URL=${OPENAGENDA_API_URL}
+      - OPENAGENDA_LOCATION_FILTER=${OPENAGENDA_LOCATION_FILTER}
+      - OPENAGENDA_START_DATE=${OPENAGENDA_START_DATE}
+      - OPENAGENDA_END_DATE=${OPENAGENDA_END_DATE}
+      - OPENAGENDA_MAX_EVENTS=${OPENAGENDA_MAX_EVENTS}
+    networks:
+      - api_net
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: src/client/Dockerfile
+    container_name: rag_client
+    restart: unless-stopped
+    ports:
+      - "8501:8501"
+    environment:
+      - RAG_API_URL=${RAG_API_URL}
+      - RAG_API_PORT=${RAG_API_PORT}
+    depends_on:
+      - api
+    networks:
+      - api_net
+
+networks:
+  api_net:
+    driver: bridge

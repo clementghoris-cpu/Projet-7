@@ -216,3 +216,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# fodler
+ressources/
+
+# database
+database/document_chunks.pkl
+database/faiss_index.idx
+
+# evaluation
+tests/evaluation/evaluation_results.json
+tests/evaluation/evaluate_rag_old.py
+tests/evaluation/ragas_evaluation_old.py

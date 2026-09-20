@@ -1,0 +1,62 @@
+name : CI Pipeline
+
+on:
+    pull_request:
+        branches:
+            - main
+            
+jobs:
+    Analyse-et-tests:
+        name: Analyse qualité code & tests unitaires
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout du dépôt
+              uses: actions/checkout@v7
+
+            - name: Installation Python
+              uses: actions/setup-python@v6
+              with:
+                python-version: '3.12'
+
+            - name: Configuration de UV
+              uses: astral-sh/setup-uv@v5
+              with:
+                enable-cache: true
+
+            - name: Installation des dépendances
+              run: uv sync --frozen --all-extras
+
+            - name: Analyse qualité code avec Ruff
+              run: uv run ruff check .
+
+            - name: Exécution des tests
+              run: uv run pytest tests/units/
+              env:
+                PYTHONPATH: .
+                TA_TIMEOUT: '60'
+
+    Evaluation-RAG:
+        name: Evaluation RAG
+        runs-on: ubuntu-latest
+        needs: Analyse-et-tests
+        steps:
+            - name: Checkout du dépôt
+              uses: actions/checkout@v7
+
+            - name: Installation Python
+              uses: actions/setup-python@v6
+              with:
+                python-version: '3.12'
+
+            - name: Configuration de UV
+              uses: astral-sh/setup-uv@v5
+              with:
+                enable-cache: true
+
+            - name: Installation des dépendances
+              run: uv sync --frozen --all-extras
+           
+            - name: Evaluation RAG
+              run: uv run python -m tests.evaluation.rag_evaluation
+              env: 
+                API_KEY_MISTRAL : ${{ secrets.MISTRAL_API_KEY }}
