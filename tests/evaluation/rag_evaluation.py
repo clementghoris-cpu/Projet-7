@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 import os
@@ -238,7 +239,7 @@ if __name__ == "__main__":
     results = run_evaluation(test_cases, mistral_evaluator)
 
     json_output_path = os.path.join(
-        os.path.dirname(dataset_path), "evaluation_results.json"
+        os.path.dirname(dataset_path), f"evaluation_results_{datetime.datetime.now(tz=datetime.UTC).strftime("%d-%m-%Y_%H%M%S")}.json"
     )
     save_results_to_json(results, output_path=json_output_path)
 

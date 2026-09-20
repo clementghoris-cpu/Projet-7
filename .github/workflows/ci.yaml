@@ -60,3 +60,10 @@ jobs:
               run: uv run python -m tests.evaluation.rag_evaluation
               env: 
                 API_KEY_MISTRAL : ${{ secrets.MISTRAL_API_KEY }}
+
+            - name: Sauvegarde des résultats d'évaluation
+              uses: actions/upload-artifact@v4
+              with:
+                name: Résultats-évaluation
+                path: tests/evaluation/evaluation_results_*.json
+                retention-days: 30
