@@ -453,7 +453,6 @@ Pour évaluer objectivement les performances du pipeline RAG (Retrieval-Augmente
 L'évaluation s'appuie sur 5 métriques clés fournies par DeepEval, permettant une analyse fine du retriever et du generator :
 1. **Faithfulness (Fidélité)** : Mesure la proportion de faits dans la réponse générée qui sont directement soutenus par les contextes récupérés. Évite le risque d'hallucination du LLM.
 2. **Answer Relevancy (Pertinence de la réponse)** : Evalue à quel point la réponse générée répond directement et de manière concise à la question posée.
-3. **Contextual Relevancy (Pertinence du contexte)** : Evalue la pertinence sémantique entre la question et l'ensemble des contextes récupérés.
 4. **Contextual Precision (Précision du contexte)** : Evalue la capacité du retriever à classer les chunks les plus pertinents en haut de la liste renvoyée.
 5. **Contextual Recall (Rappel du contexte)** : Analyse si le retriever a réussi à collecter tous les éléments d'information nécessaires à la formulation de la réponse attendue (ground truth).
 
@@ -465,14 +464,14 @@ Les tests peuvent être exécutés automatiquement via le workflow Github. Un fi
 
 Le tableau ci-dessous synthétise l'ensemble des scores obtenus par métrique sur les 5 cas de test :
 
-| ID | Question (Thématique) | Faithfulness |Answer Relevancy | Contextual Relevancy | Contextual Precision | Contextual Recall |
-| --- | --- | --- | --- | --- | --- | --- |
-| 1 | Concerts et événements musicaux | 0.85 | 0.63 | 0.52 | 0.95 | 1.0 |
-| 2 | Expositions d'art et peinture | 0.91 | 1.0 | 0.45 | 0.5 | 0.75 |
-| 3 | Quel temps fait-il aujourd'hui ? (Hors domaine) | 1.0 | 0.0 | 0.0 | 0.0 | 0.0 |
-| 4 | Événements enfants / famille | 0.64 | 0.83 | 0.68 | 0.8 | 1.0 |
-| 5 | Événements à Paris (Hors zone géographique) | 0.5 | 1.0 | 0.0 | 1.0 | 1.0 |
-|   | **MOYENNE GLOBALE** | **0.78** | **0.69** | **0.33** | **0.65** | **0.75** |
+| ID | Question (Thématique) | Faithfulness |Answer Relevancy | Contextual Precision | Contextual Recall |
+| --- | --- | --- | ---  | --- | --- |
+| 1 | Concerts et événements musicaux | 0.85 | 0.63  | 0.95 | 1.0 |
+| 2 | Expositions d'art et peinture | 0.91 | 1.0  | 0.5 | 0.75 |
+| 3 | Quel temps fait-il aujourd'hui ? (Hors domaine) | 1.0 | 0.0 | 0.0 | 0.0 |
+| 4 | Événements enfants / famille | 0.64 | 0.83  | 0.8 | 1.0 |
+| 5 | Événements à Paris (Hors zone géographique) | 0.5 | 1.0  | 1.0 | 1.0 |
+|   | **MOYENNE GLOBALE** | **0.78** | **0.69** | **0.65** | **0.75** |
 
 ##### Bilan des scores :
 
@@ -515,8 +514,6 @@ L'architecture mise en place et les choix technologiques retenus ont démontré 
 ### Limites du POC
 
 Malgré des résultats globaux très encourageants, plusieurs contraintes et limites inhérentes à la phase de prototype ont été identifiées :
-
-- **Bruit dans le contexte et découpage (Contextual Relevancy)** : La taille fixe des fenêtres de découpage (chunking) conserve parfois un surplus d'informations secondaires (URLs de réseaux sociaux, métadonnées d'organisateurs). Ce bruit réduit la pertinence contextuelle moyenne à 0,33 et peut ponctuellement déstabiliser la génération du LLM.
 
 - **Couverture thématique et géographique restreinte** : Le jeu de données actuel se limite à un volume restreint d'événements principalement localisés dans la métropole lilloise et les Hauts-de-France. L'absence de synchronisation dynamique en temps réel avec l'API OpenAgenda rend le système dépendant de sessions d'indexation manuelles ou planifiées.
 
