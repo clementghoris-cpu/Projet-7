@@ -67,7 +67,7 @@ class OpenagendaSettings(BaseSettings):
     """Récupère les informations de l'API openagenda dans le fichier .env"""
     model_config = SettingsConfigDict(env_file=".env", env_prefix="openagenda_", extra="ignore")
     api_url : str = "https://public.opendatasoft.com/api/explore/v2.1/catalog/datasets/evenements-publics-openagenda/records"
-    location_filter : str = "location_region='Hauts-de-France'"
+    location_filter : str = "location_city='Lille'"
     start_date : str = "2026-01-01"
     end_date : str = "2026-12-31"
     max_events : int = 1000
