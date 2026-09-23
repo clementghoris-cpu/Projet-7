@@ -25,6 +25,7 @@ def _fetch_events() -> list[dict]:
     offset = 0
 
     logger.info("Requête API OpenAgenda pour récupérer les événements...")
+    logger.info(f"Filtre appliqué : {WHERE_FILTER}")
 
     while len(events) < openagenda_settings.max_events:
         params = {
@@ -52,6 +53,11 @@ def update_events(events_file_path : str) -> bool:
     try:
         logger.info("Mise à jour des événements OpenAgenda...")
         events = _fetch_events()
+
+        folder_path = os.path.dirname(events_file_path)
+        
+        if folder_path:
+            os.makedirs(folder_path, exist_ok=True)        
 
         with open(events_file_path, 'w', encoding='utf-8') as file:
             json.dump(events, file, ensure_ascii=True, indent=4)

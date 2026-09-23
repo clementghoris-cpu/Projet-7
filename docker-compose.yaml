@@ -17,6 +17,8 @@ services:
       - OPENAGENDA_MAX_EVENTS=${OPENAGENDA_MAX_EVENTS}
     networks:
       - api_net
+    volumes:
+      - database:/app/src/database
 
   streamlit:
     build:
@@ -37,3 +39,6 @@ services:
 networks:
   api_net:
     driver: bridge
+
+volumes:
+  database:

@@ -9,7 +9,6 @@ from deepeval.metrics import (
     AnswerRelevancyMetric,
     ContextualPrecisionMetric,
     ContextualRecallMetric,
-    ContextualRelevancyMetric,
     FaithfulnessMetric,
 )
 from deepeval.models.base_model import DeepEvalBaseLLM
@@ -124,20 +123,9 @@ def run_evaluation(test_cases: list[LLMTestCase], mistral_llm: MistralEvaluatorL
     """Évalue chaque cas de test et retourne une liste de dictionnaires structurés."""
 
     faithfulness_metric = FaithfulnessMetric(threshold=0.5, model=mistral_llm)
-    relevancy_metric = AnswerRelevancyMetric(threshold=0.5, model=mistral_llm)
-    contextual_relevancy_metric = ContextualRelevancyMetric(threshold=0.5, model=mistral_llm)
+    relevancy_metric = AnswerRelevancyMetric(threshold=0.5, model=mistral_llm)    
     contextual_precision_metric = ContextualPrecisionMetric(threshold=0.5, model=mistral_llm)
     contextual_recall_metric = ContextualRecallMetric(threshold=0.5, model=mistral_llm)
-
-    # correctness_metric = GEval(
-    #     name="Answer Correctness",
-    #     criteria="Détermine si la réponse générée (actual_output) correspond exactement aux faits présentés dans la réponse attendue (expected_output).",
-    #     evaluation_params=[
-    #         SingleTurnParams.ACTUAL_OUTPUT,
-    #         SingleTurnParams.EXPECTED_OUTPUT,
-    #     ],
-    #     model=mistral_llm,
-    # )
 
     results = []
 
@@ -149,8 +137,6 @@ def run_evaluation(test_cases: list[LLMTestCase], mistral_llm: MistralEvaluatorL
         # Exécution des mesures
         faithfulness_metric.measure(test_case)
         relevancy_metric.measure(test_case)
-        #correctness_metric.measure(test_case)
-        contextual_relevancy_metric.measure(test_case)
         contextual_precision_metric.measure(test_case)
         contextual_recall_metric.measure(test_case)
 
@@ -163,16 +149,12 @@ def run_evaluation(test_cases: list[LLMTestCase], mistral_llm: MistralEvaluatorL
             "scores": {
                 "faithfulness": faithfulness_metric.score,
                 "relevancy": relevancy_metric.score,
-                #"correctness": correctness_metric.score,
-                "contextual_relevancy": contextual_relevancy_metric.score, 
                 "contextual_precision": contextual_precision_metric.score,
                 "contextual_recall": contextual_recall_metric.score
             },
             "reasons": {
                 "faithfulness": faithfulness_metric.reason,
                 "relevancy": relevancy_metric.reason,
-                #"correctness": correctness_metric.reason,
-                "contextual_relevancy": contextual_relevancy_metric.reason,
                 "contextual_precision": contextual_precision_metric.reason,
                 "contextual_recall": contextual_recall_metric.reason
             },
@@ -208,8 +190,6 @@ def display_summary_table(results: list[dict]):
                 ),
                 "Faithfulness": r["scores"]["faithfulness"],
                 "Relevancy": r["scores"]["relevancy"],
-                #"Correctness": r["scores"]["correctness"],
-                "Contextual_relevancy": r["scores"]["contextual_relevancy"],
                 "contextual_precision": r["scores"]["contextual_precision"],
                 "contextual_recall": r["scores"]["contextual_recall"]
             }
