@@ -21,7 +21,7 @@ Le projet comprend :
 <img src="./docs/images/Diagramme UML architecture.png" alt="Architecture projet" width="650">
 
 
-> Pour plus de détails, veuillez vous référer  au [rapport technique]("docs/Rapport technique.md".
+> Pour plus de détails, veuillez vous référer  au [rapport technique]("docs/Rapport technique.md").
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
