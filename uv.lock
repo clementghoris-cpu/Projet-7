@@ -3,12 +3,12 @@ revision = 3
 requires-python = ">=3.12, <3.14"
 resolution-markers = [
     "python_full_version >= '3.13' and sys_platform == 'win32'",
-    "python_full_version < '3.13' and sys_platform == 'win32'",
     "python_full_version >= '3.13' and sys_platform == 'emscripten'",
-    "python_full_version < '3.13' and sys_platform == 'emscripten'",
     "python_full_version >= '3.13' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'",
-    "python_full_version < '3.13' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'",
     "python_full_version >= '3.13' and sys_platform == 'darwin'",
+    "python_full_version < '3.13' and sys_platform == 'win32'",
+    "python_full_version < '3.13' and sys_platform == 'emscripten'",
+    "python_full_version < '3.13' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'",
     "python_full_version < '3.13' and sys_platform == 'darwin'",
 ]
 
@@ -1460,7 +1460,7 @@ wheels = [
 
 [[package]]
 name = "mistral"
-version = "22.0.0"
+version = "23.0.0.0rc1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "alembic" },
@@ -1498,9 +1498,9 @@ dependencies = [
     { name = "wsme" },
     { name = "yaql" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ef/38/930d8b1410e216bfd5e53fb44e1c94c8e094788420f31b144107f4c058ac/mistral-22.0.0.tar.gz", hash = "sha256:32e6f7c67c72818b9cb335b0ea30fb493bf2796f4489d8962474519df350a18a", size = 1565192, upload-time = "2026-04-01T10:51:17.659Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/97/bf/6dbca04109878a4a43ec6082520ce44088dca9e8ad5a23c218023b2c2359/mistral-23.0.0.0rc1.tar.gz", hash = "sha256:e835e8c949ce137c6c833a2d916283b45479aada59b13f185da690e42e30aaff", size = 1595602, upload-time = "2026-09-08T21:17:25.366Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/41/07/6ad0ec950f97a3c3e0f6543913473a88d46c731a9f12fee674db1e5f6c36/mistral-22.0.0-py3-none-any.whl", hash = "sha256:ae1bf3f45d2f013f6ec5fe9c769aad215843959a144ba5b0e41c4cbae52d740c", size = 694246, upload-time = "2026-04-01T10:51:16.054Z" },
+    { url = "https://files.pythonhosted.org/packages/b5/12/8ed97018ad78d33b60dbb0bca4d00644dee9ca078b4c47362edd4b6ecd2b/mistral-23.0.0.0rc1-py3-none-any.whl", hash = "sha256:8539f419a4cf801a7e1ead0193567227a99bc8fe1f8af63b0d58b9a716792773", size = 749105, upload-time = "2026-09-08T21:17:23.911Z" },
 ]
 
 [[package]]
@@ -3393,10 +3393,10 @@ version = "2.14.0+cpu"
 source = { registry = "https://download.pytorch.org/whl/cpu" }
 resolution-markers = [
     "python_full_version >= '3.13' and sys_platform == 'win32'",
-    "python_full_version < '3.13' and sys_platform == 'win32'",
     "python_full_version >= '3.13' and sys_platform == 'emscripten'",
-    "python_full_version < '3.13' and sys_platform == 'emscripten'",
     "python_full_version >= '3.13' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'",
+    "python_full_version < '3.13' and sys_platform == 'win32'",
+    "python_full_version < '3.13' and sys_platform == 'emscripten'",
     "python_full_version < '3.13' and sys_platform != 'darwin' and sys_platform != 'emscripten' and sys_platform != 'win32'",
 ]
 dependencies = [
